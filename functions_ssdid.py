@@ -50,7 +50,7 @@ def fit_time_weights(data, outcome_col, year_col, state_col, treat_col, post_col
         # pivot the data to the (T_pre, N_co) matrix representation
         y_pre = (control
                  .query(f"~{post_col}")
-                 .pivot(year_col, state_col, outcome_col))
+                 .pivot(index=year_col,columns= state_col, values=outcome_col))
         
         # group post-treatment time period by units to have a (1, N_co) vector.
         y_post_mean = (control
@@ -70,7 +70,7 @@ def fit_time_weights(data, outcome_col, year_col, state_col, treat_col, post_col
         problem = cp.Problem(objective, constraints)
         problem.solve(verbose=False)
         
-        # print("Intercept: ", w.value[0])
+        #print("Intercept: ", w.value[0])
         return pd.Series(w.value[1:], # remove intercept
                          name="time_weights",
                          index=y_pre.index)
@@ -105,7 +105,7 @@ def fit_unit_weights(data, outcome_col, year_col, state_col, treat_col, post_col
     # pivot the data to the (T_pre, N_co) matrix representation
     y_pre_control = (pre_data
                      .query(f"~{treat_col}")
-                     .pivot(year_col, state_col, outcome_col))
+                     .pivot(index =year_col, columns = state_col,values = outcome_col))
     
     # group treated units by time periods to have a (T_pre, 1) vector.
     y_pre_treat_mean = (pre_data
@@ -126,7 +126,7 @@ def fit_unit_weights(data, outcome_col, year_col, state_col, treat_col, post_col
     problem = cp.Problem(objective, constraints)
     problem.solve(verbose=False)
     
-    # print("Intercept:", w.value[0])
+    #print("Intercept:", w.value[0])
     return pd.Series(w.value[1:], # remove intercept
                      name="unit_weights",
                      index=y_pre_control.columns)
